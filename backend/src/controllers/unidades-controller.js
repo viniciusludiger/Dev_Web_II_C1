@@ -1,144 +1,150 @@
-const unidadeModel = require('../models/unidades-model');
+const unidadeSaudeModel = require('../models/unidade-model');
+const mongodb = require('../infra/mongodb');
 
-exports.adicionarUndade = (req,res) => {
-    unidadeModel.find((err, unidade) =>{
+// nome_unidade
+// descricao
+// endereco_unidade
+// telefone_unidade
+// email_unidade
+// lat_long
+// data_alteracao
 
-        if(err){
-            console.log("Não foi possível recuperar a unidade!");
+exports.adicionarUnidade = (req, res) => {
+    unidadeSaudeModel.find((error, unidades) => {
+        if(error){
+            console.log("Não foi possível adicionar a nova unidade");
             res.json({
-                status:"erro",
-                message: "Não foi possível recuperar as unidades e portanto inserir uma nova unidade"
+                status: 'erro',
+                message: "Não foi possível adicionar a nova unidade"
             });
         }
 
-
-        for (let i = 0; i < unidade.length; i++){
-            if(req.body.nome_unidade === unidade[i].nome_unidade){
-                res.jeson({
-                    status: "erro",
-                    message: "Ja possui unidade com este nome"
+        for (let i = 0; i < unidades.length; i++) {
+            
+            if (req.body.email_unidade == unidades[i].email_unidade) {
+                res.json({
+                    status: 'erro', 
+                    message: `A unidade ${req.body.nome_unidade} já está cadastrado com o email ${req.body.email_unidade}`
                 });
                 return;
             }
-            
         }
 
-        let unidade = new unidadeModel();
-        unidade.nome_unidade = req.nome_unidade;
-        unidade.descricao_unidade = req.descricao_unidade;
-        unidade.endereco_unidade = req.endereco_unidade;
-        unidade.telefone_unidade = req.telefone_unidade;
-        unidade.email_unidade = req.email_unidade;
-        unidade.latlong_unidade = req.latlong_unidade;
-        unidade.save((erro) =>{
-            if(erro){
+        let unidade = new unidadeSaudeModel();
+        unidade.nome_unidade = req.body.nome_unidade;
+        unidade.descricao = req.body.descricao;
+        unidade.endereco_unidade = req.body.endereco_unidade;
+        unidade.telefone_unidade = req.body.telefone_unidade;
+        unidade.email_unidade = req.body.email_unidade;
+        unidade.lat_long = req.body.lat_long;
+
+        unidade.save((error) => {
+            if(error){
                 res.send({
-                    status: "erro",
-                    message: "Não foi possível inserir esta unidade"
+                    status: 'erro',
+                    // message: 'Não foi possível inserir a nova unidade'
+                    message: error
                 });
             }else{
                 res.send({
-                    status: "Ok",
-                    message: `unidade ${req.body.nome_unidade} inserida com sucesso`
-
+                    status: 'ok',
+                    message: `A unidade ${unidade.nome_unidade} foi inserida com sucesso`
                 });
             }
         });
     });
-
 }
 
 exports.listarUnidade = (req, res) => {
-    unidadeModel.find(function(err, unidade){
-        if(err){
-            res.json({
-                status:"Erro",
-                message: "Não foi possível recuperar as unidades!"
-            });
-        }else{
-            res.json({
-                status:"Ok",
-                message: unidade
-            });
-        }
-    });
-
+  unidadeSaudeModel.find((error, unidades) => {
+      if(error){
+          console.log("Não foi possível listas as unidades");
+          res.json({
+              status: 'erro',
+              message: "Não foi possível listas as unidades"
+          });
+      }else{
+          res.json({
+              status: 'ok',
+              message: unidades
+          });
+      }
+  });  
 }
 
-exports.listarUnidadeId = (req, res) => {
+exports.listarUnidadePorId = (req, res) => {
     let id_unidade = req.params.id;
 
-    unidadeModel.findById(id_unidade, (erro, unidade) => {
-        if(err || !unidade){
+    unidadeSaudeModel.findById(id_unidade, (error, unidades) => {
+        if(error || !unidades){
+            console.log(`Não foi possível encontrar a unidade ${id_unidade}`);
             res.json({
-                status: "Erro",
-                message: `Não foi possivel recuperar a unidade de id: ${id_unidade}`
-            
+                status: 'erro',
+                message: `Não foi possível encontrar a unidade ${id_unidade}`
             });
         }else{
+            console.log(`Unidade de id ${id_unidade} foi encontrada com sucesso`);
             res.json({
-                status: "Erro",
-                message: unidade
+                status: 'ok',
+                message: unidades
             });
         }
-    });
-}
-
-exports.removeUnidade = (req, res) => {
-    let id_unidade = req.params.id;
-
-    unidadeModel.remove({
-        _id:id_unidade
-    }, (err) => {
-        if(err){
-            res.json({
-                status: "Erro",
-                message: "Houve um erro ao deletar"
-            });
-        }else{
-            res.json({
-                status: "ok",
-                message: "unidade deletado com sucesso !"
-            });
-        }
-    
     });
 }
 
 exports.atualizarUnidade = (req, res) => {
-
     let id_unidade = req.params.id;
 
-    pessoasModel.findById(id_unidade, (erro, unidade) => {
-        if(erro || !unidade){
+    unidadeSaudeModel.findById(id_unidade, (error, unidades) => {
+        if(error || !unidades){
+            console.log(`Não foi possível atualizar a unidade com o id ${id_unidade}`);
             res.json({
-                status: "Erro",
-                message: `Não foi possível recuperar a unidade de id ${id_unidade} para atualização`
-            })
+                status: 'erro',
+                message: `Não foi possível atualizar a unidade com o id ${id_unidade}`
+            });
         }else{
-            unidade.nome_unidade = req.nome_unidade;
-            unidade.descricao_unidade = req.descricao_unidade;
-            unidade.endereco_unidade = req.endereco_unidade;
-            unidade.telefone_unidade = req.telefone_unidade;
-            unidade.email_unidade = req.email_unidade;
-            unidade.latlong_unidade = req.latlong_unidade;
+            unidades.nome_unidade = req.body.nome_unidade;
+            unidades.descricao = req.body.descricao;
+            unidades.endereco_unidade = req.body.endereco_unidade;
+            unidades.telefone_unidade = req.body.telefone_unidade;
+            unidades.email_unidade = req.body.email_unidade;
+            unidades.lat_long - req.body.lat_long;
+            unidades.data_alteracao = Date.now();
 
-            unidade.save((err) =>{
-                if(err){
-                    res.send({
-                        status: "erro",
-                        message: "Não foi possível atualizar esta pessao"
+            unidades.save((error) => {
+                if(error){
+                    res.json({
+                        status: 'erro',
+                        message: `Houve um erro ao atualizar a unidade ${unidades.nome_unidade}`
                     });
                 }else{
-                    res.send({
-                        status: "Ok",
-                        message: `unidade ${req.body.nome_unidade} atualizar com sucesso`
-    
+                    res.json({
+                        status: 'ok',
+                        message: `A unidade ${unidades.nome_unidade} foi atualizada com sucesso`,
+                        novaUnidade: unidades
                     });
                 }
             });
-
         }
     });
+}
 
+exports.removerUnidade = (req, res) => {
+    let id_unidade = req.params.id;
+
+    unidadeSaudeModel.remove({
+        _id: id_unidade
+    }, (error, unidades) => {
+        if(error){
+            res.json({
+                status: 'erro',
+                message: `Não foi possível remover a unidade ${unidades.nome_unidade}`
+            });
+        }else{
+            res.json({
+                status: 'ok',
+                message: `A Unidade foi deletada com sucesso`
+            });
+        }
+    });
 }

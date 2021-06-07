@@ -1,53 +1,41 @@
 const mongoose = require('mongoose');
 
 const pessoaSchema = mongoose.Schema({
-
-    nome_pessoa: {
+    nome_pessoa:{
         type: mongoose.Schema.Types.String,
         required: true
-
     },
-
-    cpf_pessoa: {
-        type: mongoose.Schema.Types.Number,
+    cpf:{
+        type: mongoose.Schema.Types.String,
         required: true
-
     },
-
-    data_nasciemento_pessoa: {
+    data_nascimento: {
         type: mongoose.Schema.Types.Date,
         required: true
-
     },
-
-    telefone_pessoa: {
-        type: mongoose.Schema.Types.Number,
-        required: false
-
+    telefone_pessoa:{
+        type: mongoose.Schema.Types.String,
+        required: true
     },
-
     grupo_prioritario: {
         type: mongoose.Schema.Types.Boolean,
         required: true
-
     },
-
-    endereco_pessoa: {
-        type: mongoose.Schema.Types.String,
-        required: false
-        
-    },
-
-    email_pessoa:{
-        
+    endereco_pessoa:{
         type: mongoose.Schema.Types.String,
         required: true
-
+    },
+    email_pessoa:{
+        type: mongoose.Schema.Types.String,
+        required: true
+    },
+    data_alteracao: {
+        type: mongoose.Schema.Types.Date,
+        default: null
     }
-
 });
 
-let Pessoa = module.exports = mongoose.model('pessoa', pessoaSchema)
+let Pessoa = module.exports = mongoose.model('pessoa', pessoaSchema);
 
 module.exports.get = function(callback, limit){
     Pessoa.find(callback).limit(limit);

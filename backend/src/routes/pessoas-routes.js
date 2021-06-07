@@ -12,4 +12,4 @@ router.put('/:id', pessoasController.atualizarPessoas);
 
 router.delete('/:id', pessoasController.removerPessoas);
 
-module.exports = router
+module.exports = router;

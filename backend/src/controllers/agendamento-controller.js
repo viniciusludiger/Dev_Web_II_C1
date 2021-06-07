@@ -1,142 +1,138 @@
-const agendamentoModel = require ('../models/agendmento-model');
+const agendamentoModel = require('../models/agendamento-model');
+const mongodb = require('../infra/mongodb');
 
-exports.adicionaragendamento = (req,res) => {
-    agendamentoModel.find((err, agendamento) =>{
+// data_hora_agendamento
+// necessidades_especiais
+// observacoes_agendamento
+// data_alteracao
 
-        if(err){
-            console.log("Não foi possível recuperar os agendamentos!");
+exports.adicionarAgendamentos = (req, res) => {
+    agendamentoModel.find((error, agendamentos) => {
+        if(error){
+            console.log("Não foi possível registrar este agendamento");
             res.json({
-                status:"erro",
-                message: "Não foi possível recuperar os agendamentos e portanto inserir um nova agendamento!"
+                status: 'erro',
+                message: 'Não foi possível inserir o novo agendamento'
             });
         }
-
-
-        for (let i = 0; i < agendamento.length; i++){
-            if(req.body.cpf_agendamento === agendamento[i].cpf_agendamento){
-                res.jeson({
-                    status: "erro",
-                    message: `data ${req.body.cpf_agendamento} ja está cadastrado`
-                });
-                return;
-            }
+        for (let i = 0; i < agendamentos.length; i++) {
             
+            if (req.body.data_hora_agendamento == agendamentos[i].data_hora_agendamento) {
+                res.json({
+                    status: 'erro',
+                    message: `O agendamento com o horário ${req.body.data_hora_agendamento} já está preenchido`
+                });
+            }
+            return;
         }
+        let agendamento = new agendamentoModel();
+        agendamento.data_hora_agendamento = req.body.data_hora_agendamento;
+        agendamento.necessidades_especiais = req.body.necessidades_especiais;
+        agendamento.observacoes_agendamento = req.body.observacoes_agendamento;
 
-        let agendamento = new agendamentosModel();
-        agendamento.data_agendamento = req.data_agendamento;
-            agendamento.hora_agendamento = req.hora_agendamento;
-            agendamento.necessidade_especial = req.necessidade_especial;
-            agendamento.observacao_agendamento = req.observacao_agendamento;
-        agendamento.save((erro) =>{
-            if(erro){
+        agendamento.save((error) => {
+            if(error){
                 res.send({
-                    status: "erro",
-                    message: "Não foi possível inserir este agendamento"
+                    status: 'erro',
+                    message: 'Não foi possível inserir o agendamento'
                 });
             }else{
                 res.send({
-                    status: "Ok",
-                    message: `data ${req.body.data_agendamento} inserida com sucesso`
-
+                    status: 'ok',
+                    message: `O agendamento de data e hora ${agendamento.data_hora_agendamento} foi inserido com sucesso`
                 });
             }
         });
-
-
     });
-
 }
 
-exports.listAragendamento = (req, res) => {
-    gendamentoModel.find(function(err,agendamento){
-        if(err){
+exports.listarAgendamentos = (req, res) => {
+    agendamentoModel.find((error, agendamentos) => {
+        if(error){
+            console.log("Não foi possível listar os agendamentos");
             res.json({
-                status:"Erro",
-                message: "Não foi possível recuperar os agendamentos!"
+                status: 'erro',
+                message: "Não foi possível listar os agendamentos"
             });
         }else{
             res.json({
-                status:"Ok",
-                message: agendamento
-            });
-        }
-    });
-
-}
-
-exports.listarAgendamentoId = (req, res) => {
-    let id_agendamento = req.params.id;
-
-    gendamentoModel.findById(id_agendamento, (erro, agendamento) => {
-        if(err || !agendamento){
-            res.json({
-                status: "Erro",
-                message: `Não foi possivel recuperar o agendamento de id: ${id_agendamento}`
-            
-            });
-        }else{
-            res.json({
-                status: "Erro",
-                message: agendamento
+                status: 'ok',
+                message: agendamentos
             });
         }
     });
 }
 
-exports.removeAluno = (req, res) => {
+exports.listarAgendamentosPorId = (req, res) => {
     let id_agendamento = req.params.id;
 
-    gendamentoModel.remove({
-        _id:id_agendamento
-    }, (err) => {
-        if(err){
+    agendamentoModel.findById(id_agendamento, (error, agendamentos) => {
+        if(error || !agendamentos){
+            console.log(`Não foi possível encontrar o agendamento com o id ${id_agendamento}`);
             res.json({
-                status: "Erro",
-                message: "Houve um erro ao deletar"
+                status: 'erro',
+                message: `Não foi possível encontrar o agendamento com o id ${id_agendamento}`
             });
         }else{
+            console.log(`O agendamento com o id ${id_agendamento} foi encontrado na base de dados`);
             res.json({
-                status: "ok",
-                message: "agendamento deletado com sucesso !"
+                status: 'ok',
+                message: agendamentos
             });
         }
-    
     });
 }
 
-exports.atualizaragendamento = (req, res) => {
-
+exports.atualizarAgendamentos = (req, res) => {
     let id_agendamento = req.params.id;
 
-    agendamentoModel.findById(id_agendamento, (erro, agendamento) => {
-        if(erro || !agendamento){
+    agendamentoModel.findById(id_agendamento, (error, agendamentos) => {
+        if(error || !agendamentos){
+            console.log(`Não foi possível atualizar o agendamento de id ${id_agendamento}`);
             res.json({
-                status: "Erro",
-                message: `Não foi possível recuperar o agendamento de id ${id_agendamento} para atualização`
-            })
+                status: 'erro',
+                message: `Não foi possível atualizar o agendamento de id ${id_agendamento}`
+            });
         }else{
-            agendamento.data_agendamento = req.data_agendamento;
-            agendamento.hora_agendamento = req.hora_agendamento;
-            agendamento.necessidade_especial = req.necessidade_especial;
-            agendamento.observacao_agendamento = req.observacao_agendamento;
-            
-            agendamento.save((err) =>{
-                if(err){
-                    res.send({
-                        status: "erro",
-                        message: "Não foi possível atualizar o agendamento"
+            agendamentos.data_hora_agendamento = req.body.data_hora_agendamento;
+            agendamentos.necessidades_especiais = req.body.necessidades_especiais;
+            agendamentos.observacoes_agendamento = req.body.observacoes_agendamento;
+            agendamentos.data_alteracao = Date.now();
+
+            agendamentos.save((error) => {
+                if(error){
+                    res.json({
+                        status: 'erro',
+                        message: `Houve um erro ao atualizar o agendamento do dia ${agendamentos.data_hora_agendamento}`
                     });
                 }else{
-                    res.send({
-                        status: "Ok",
-                        message: `data ${req.body.data_agendamento} atualizar com sucesso`
-    
+                    res.json({
+                        status: 'ok',
+                        message: `O agendamento do dia ${agendamentos.data_hora_agendamento} foi atualizado com sucesso`,
+                        novoAgendamento: agendamentos
                     });
                 }
             });
-
         }
     });
+}
 
+exports.removerAgendamentos = (req, res) => {
+    let id_agendamento = req.params.id;
+
+    agendamentoModel.remove({
+        _id: id_agendamento
+    }, (error, agendamentos) => {
+        if(error){
+            res.json({
+                status: 'erro',
+                message: `Não foi possível remover o agendamento do dia ${agendamentos.data_hora_agendamento}`
+            });
+        }else{
+            res.json({
+                status: 'ok',
+                message: `O agendamento selecionado foi deletado com sucesso`
+            });
+        }
+    });
 }
